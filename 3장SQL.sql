@@ -118,3 +118,102 @@ select * from member limit 3;
 select mem_name, debut_date from member
 	order by debut_date
 	limit 3;
+    
+select addr from member order by addr;
+select distinct addr from member order by addr;
+-- 컬럼명 앞에 작성하여 중복된 데이터는 제거
+
+select mem_id, amount from buy order by mem_id;
+
+select mem_id, SUM(amount) as '합계' from buy group by mem_id;
+
+select mem_id as 'ID', sum(amount) as 'SUM' from buy group by mem_id;
+
+select mem_id '회원아이디', sum(amount*price) '총 구매금액'
+	from buy group by mem_id;
+    
+
+    
+select avg(amount) '평균 구매 개수' from buy;
+-- 그룹을 하지 않으면 모든 행의 값의 평균을 구한다
+
+select mem_id as '아이디', avg(amount) as '평균 구매 개수' from buy
+	group by mem_id;
+-- 그룹을 아이디별로 지정했으므로, 아이디별 행의 평균을 구한다
+
+select count(*) from member;
+select count(phone1) '연락처가 있는 회원' from member;
+-- Null값은 제외됨
+
+select mem_id '회원아이디', sum(amount*price) '총 구매금액'
+	from buy group by mem_id
+	having sum(amount*price) > 1000
+    order by sum(amount*price) desc;
+-- 별칭은 선택할때만... '총 구매금액' > 1000 사용못함
+
+create table hongong1(
+	toy_id int,
+    toy_name varchar(4),
+    age int
+);
+
+insert into hongong1 values(1, '우디', 25);
+insert into hongong1 (toy_id, toy_name) values(2, '버즈');
+insert into hongong1 (toy_name, age, toy_id) values('제시',20,3);
+select * from hongong1;
+
+create table hongong2 (
+	toy_id int auto_increment primary key,
+    toy_name varchar(4),
+    age int
+);
+
+insert into hongong2 values (null, '보핍', 25);
+insert into hongong2 values (null, '슬링키', 22);
+insert into hongong2 values (null, '렉스', 21);
+-- null값이지만 자동증가되는 숫자가 들어가게된다
+select * from hongong2;
+
+select last_insert_id();
+
+alter table hongong2 auto_increment=100;
+-- auto값을 100부터 시작하게 만들었다.
+insert into hongong2 values (null, '재남', 35);
+-- 100에 들어가는 것을 확인할 수 있다.
+
+SHOW global variables;
+-- 시스템 전역변수 확인하기
+
+-- ------------ WORLD 데이터베이스 사용중 ------------ --
+
+SELECT count(*) from city;
+DESC city;
+
+select * from city limit 5;
+
+create table city_popul (
+	city_name varchar(35),
+    population int
+);
+-- 복사해올 테이블 만듦
+
+insert into city_popul select Name, Population from city;
+-- city테이블의 Name과 Population 내용을 city_popul에 삽입해라 (서브쿼리)
+
+select * from city_popul;
+
+update city_popul
+	set city_name = '서울'
+    where city_name = 'Seoul';
+
+select * from city_popul where city_name = '서울';
+
+update city_popul
+	set city_name = '뉴욕', population = 0
+    where city_name = 'New York';
+
+select * from city_popul where city_name = '뉴욕';
+
+update city_popul
+	set population = population / 10000;
+select * from city_popul limit 5;
