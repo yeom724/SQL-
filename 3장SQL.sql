@@ -217,3 +217,12 @@ select * from city_popul where city_name = '뉴욕';
 update city_popul
 	set population = population / 10000;
 select * from city_popul limit 5;
+
+DELETE FROM city_POPUL
+	where city_name LIKE 'New%';
+-- 11건 삭제됨
+
+delete from city_popul
+	where city_name LIKE 'A%'
+    limit 5;
+-- 일부 삭제를 진행하고 싶을 경우 리밋으로 한계를 설정할 수 있다.
