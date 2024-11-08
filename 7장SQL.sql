@@ -68,3 +68,67 @@ drop table noTable;
 
 call ifelse_proc('오마이걸');
 call dynamic_proc('member');
+
+set global log_bin_trust_function_creators = 1;
+use market_db;
+
+-- 이 안에서 스토어드 프로시저나 함수 작성 가능
+delimiter $$
+	create function sumFunc(number1 int, number2 int) returns int
+		begin
+			return number1 + number2;
+		end $$
+		
+	create function calcYearFunc(dYear int) returns int
+		begin
+			declare runYear int; -- 변수생성
+            set runYear = year(curdate()) - dYear;
+            return runYear;
+        end $$
+        
+	create procedure cursor_proc()
+		begin
+			declare memNumber int;
+            declare cnt int default 0; -- 변수선언과 초기화
+            declare total int default 0;
+            declare endOfRow boolean default false;
+            
+            declare memberCursor cursor for
+				select mem_number from member;
+                
+			declare continue handler for
+				not found set endOfRow = true;
+                
+			open memberCursor;
+            
+            cursor_loop: Loop
+				fetch memberCursor into memNumber;
+                
+                if endOfRow then
+					leave cursor_loop; -- break
+				end if;
+                
+                set cnt = cnt + 1;
+                set total = total + memNumber;
+			END loop cursor_loop;
+            
+            select (total/cnt) as '회원의 평균 인원 수';
+            
+            close memberCursor;
+        end $$
+delimiter ;
+
+select sumFunc(100, 200) as '합계';
+select calcYearFunc(2010) as '활동 햇수';
+
+select calcYearFunc(2007) into @debut2007;
+select calcYearFunc(2013) into @debut2013;
+select @debut2007-@debut2013 as '2007과 2013차이';
+
+-- 함수 체이닝
+select mem_id, mem_name, calcYearFunc(year(debut_date)) as '활동 햇수' from member;
+
+drop function calcYearFunc;
+
+call cursor_proc();
+select mem_id, mem_number from member;
