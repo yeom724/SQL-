@@ -116,6 +116,26 @@ delimiter $$
             
             close memberCursor;
         end $$
+        
+        CREATE TRIGGER myTrigger
+			AFTER DELETE ON trigger_table FOR EACH ROW
+            BEGIN
+				SET @msg = '가수 그룹이 삭제됨';
+            END $$
+            
+		create trigger singer_updateTrg
+			after update on singer for each row
+            begin
+				insert into backup_singer values(old.mem_id, old.mem_name,
+					old.mem_number, old.addr, '수정', curdate(), current_user());
+            end $$
+		
+        create trigger singer_deleteTrg
+			after delete on singer for each row
+            begin
+				insert into backup_singer values(old.mem_id, old.mem_name,
+					old.mem_number, old.addr, '삭제', curdate(), current_user());
+            end $$
 delimiter ;
 
 select sumFunc(100, 200) as '합계';
@@ -132,3 +152,42 @@ drop function calcYearFunc;
 
 call cursor_proc();
 select mem_id, mem_number from member;
+
+USE market_db;
+
+CREATE TABLE IF NOT EXISTS trigger_table(
+	id INT,
+    txt VARCHAR(10)
+);
+
+INSERT INTO trigger_table VALUES(1,'레드벨벳');
+INSERT INTO trigger_table VALUES(2,'잇지');
+INSERT INTO trigger_table VALUES(3,'블랙핑크');
+
+SET @msg = '';
+INSERT INTO trigger_table values(4, '마마무');
+
+UPDATE trigger_table SET txt = '블랙핑크' WHERE id = 3;
+
+DROP TRIGGER myTrigger;
+
+DELETE FROM trigger_table WHERE id=4;
+SELECT @msg;
+
+CREATE TABLE singer (select mem_id, mem_name, mem_number, addr FROM member);
+create table backup_singer(
+	mem_id char(8) not null,
+    mem_name varchar(10) not null,
+    mem_number int not null,
+    addr char(2) not null,
+    modType char(2), -- 변경한 타입, 직접 입력
+    modDate date,	-- 변경한 날짜
+    modUser varchar(30) -- 변경한 사용자
+);
+
+update singer set addr = '영국' where mem_id='BLK';
+delete from singer where mem_number >= 7;
+select * from backup_singer;
+
+truncate table singer;
+-- 테이블은 남겨놓고 알맹이만 지우지만 delete는 아니기 때문에 백업이 안된다
