@@ -82,11 +82,24 @@ select B.mem_id, M.mem_name, B.prod_name, M.addr, concat(M.phone1,M.phone2) as '
     on b.mem_id = m.mem_id
     order by m.mem_id;
     
-select distinct m.mem_id, m.mem_name, m.addr
+select distinct  m.mem_name, B.mem_id, m.mem_id,  m.addr
 	from buy as b
     inner join member as m
     on m.mem_id = b.mem_id
     order by m.mem_id;
+    
+select * from member;
+
+select distinct m.debut_date
+	from buy as b
+    inner join member as m
+    on m.mem_id = b.mem_id
+    order by m.debut_date;
+    
+select distinct a.mem_id, a.debut_date, B.prod_name from member as a
+	inner join buy as b
+    on a.mem_id = b.mem_id
+    order by a.mem_id;
     
 select m.mem_id, m.mem_name, b.prod_name, m.addr
 	from member as m
@@ -164,6 +177,7 @@ select * from member;
 select mem_id, sum(price*amount) as '총 구매금액', '최우수'  as 'test'
 	from buy
 	group by mem_id;
+    -- 집계함수를 사용하려면 그룹바이가 필요하다.
 
 select mem_id, sum(price*amount) as '총 구매금액'
 	from buy
